@@ -2,9 +2,32 @@
 	var canvas = null
 	var ctx = null
 
-	const style = {
-		font: '15px "Baloo Tammudu"',
+	const defaultStyle = {
+		font: '15px "Oxygen Mono"',
 		padding: 15,
+		boxRadius: 15 / 4,
+		boxBackground: '#fff',
+		boxOutline: '#000',
+	}
+
+	let style = defaultStyle
+
+	function roundRect(ctx, x, y, width, height, radius) {
+		if (typeof radius === 'number') {
+			radius = { tl: radius, tr: radius, br: radius, bl: radius }
+		}
+
+		ctx.beginPath()
+		ctx.moveTo(x + radius.tl, y)
+		ctx.lineTo(x + width - radius.tr, y)
+		ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr)
+		ctx.lineTo(x + width, y + height - radius.br)
+		ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height)
+		ctx.lineTo(x + radius.bl, y + height)
+		ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl)
+		ctx.lineTo(x, y + radius.tl)
+		ctx.quadraticCurveTo(x, y, x + radius.tl, y)
+		ctx.closePath()
 	}
 
 	class Box {
@@ -110,7 +133,10 @@
 
 		draw() {
 			ctx.fillStyle = '#fff'
-			ctx.rect(this.position.x - this.width / 2.0, this.position.y - this.height / 2.0, this.width, this.height)
+			//ctx.rect(this.position.x - this.width / 2.0, this.position.y - this.height / 2.0, this.width, this.height)
+			roundRect(ctx, this.position.x - this.width / 2.0, this.position.y - this.height / 2.0, this.width, this.height, style.boxRadius)
+			ctx.fillStyle = style.boxBackground
+			ctx.strokeStyle = style.boxOutline
 			ctx.stroke()
 			ctx.fill()
 
@@ -118,7 +144,7 @@
 			ctx.textAlign = 'center'
 			ctx.textBaseline = 'middle'
 			ctx.fillStyle = '#000'
-			ctx.fillText(this.name, this.position.x, this.position.y + style.padding / 2)
+			ctx.fillText(this.name, this.position.x, this.position.y)
 
 			const y = this.position.y
 			const h = this.height
@@ -131,7 +157,10 @@
 				ctx.beginPath()
 				ctx.arc(this.position.x - this.width / 2.0, style.padding * i - style.padding / 2 * l + y + style.padding / 2, style.padding * 2.0 / 8.0, 0.0, 2.0 * Math.PI)
 
+				ctx.strokeStyle = '#000'
+
 				if (input.connection) {
+					ctx.fillStyle = '#000'
 					ctx.fill()
 
 					ctx.beginPath()
@@ -141,6 +170,7 @@
 				}
 				else {
 					ctx.stroke()
+					ctx.fillStyle = '#fff'
 					ctx.fill()
 				}
 			}
@@ -153,9 +183,12 @@
 				ctx.arc(this.position.x + this.width / 2.0, style.padding * i - style.padding / 2 * l + y + style.padding / 2, style.padding * 2.0 / 8.0, 0.0, 2.0 * Math.PI)
 
 				if (output.connection) {
+					ctx.fillStyle = '#000'
 					ctx.fill()
 				}
 				else {
+					ctx.strokeStyle = '#000'
+					ctx.fillStyle = '#fff'
 					ctx.stroke()
 					ctx.fill()
 				}
@@ -185,6 +218,8 @@
 				draw()
 				return
 			}
+
+			cursorState.currentTarget = null
 
 			for (let i in boxes) {
 				const box = boxes[i]
@@ -275,7 +310,7 @@
 
 		draw()
 
-		let f = new FontFace('Baloo Tammudu', 'url(https://fonts.googleapis.com/css?family=Baloo+Tammudu)')
+		let f = new FontFace('Oxygen Mono', 'url(https://fonts.googleapis.com/css?family=Oxygen+Mono)')
 		f.load().then(function() {
 			draw()
 		})
